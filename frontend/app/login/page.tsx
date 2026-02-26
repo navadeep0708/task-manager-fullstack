@@ -1,5 +1,5 @@
 "use client"
-
+console.log("ENV:", process.env.NEXT_PUBLIC_API_URL);
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
