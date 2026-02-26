@@ -5,6 +5,19 @@ from app.utils.dependencies import get_current_user
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",
+    "https://task-manager-fullstack-n1el.vercel.app"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
