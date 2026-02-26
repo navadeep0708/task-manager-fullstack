@@ -1,8 +1,8 @@
 "use client"
-console.log("ENV:", process.env.NEXT_PUBLIC_API_URL);
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import toast from "react-hot-toast"
+import { loginUser } from "@/services/api"
 
 export default function Login() {
   const router = useRouter()
@@ -12,74 +12,71 @@ export default function Login() {
     password: "",
   })
 
-  const handleChange = (e: any) => {
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      })
+      const data = await loginUser(form)
 
-      const data = await res.json()
-
-      if (res.ok) {
+      if (data.access_token) {
         localStorage.setItem("token", data.access_token)
-        toast.success("Login successful")
-        router.replace("/dashboard")
+        router.push("/dashboard")
       } else {
-        toast.error(data.detail || "Login failed")
+        alert(data.detail || "Invalid credentials")
       }
-    } catch {
-      toast.error("Server error")
+    } catch (error) {
+      console.error("Login error:", error)
+      alert("Server error. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black text-white">
-
-      <div className="bg-gray-900 p-10 rounded-xl shadow-xl w-full max-w-md">
-
-        <h1 className="text-3xl font-bold mb-8 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-900 p-8 rounded-xl shadow-lg w-96 space-y-6"
+      >
+        <h2 className="text-2xl font-bold text-white text-center">
           Login
-        </h1>
+        </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+          className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
+        />
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            className="p-3 bg-white text-black rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
+          className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
+        />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-            className="p-3 bg-white text-black rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 transition p-3 rounded-lg font-semibold"
-          >
-            Login
-          </button>
-
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700 transition-all p-3 rounded text-white font-semibold"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
   )
 }
