@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { loginUser } from "@/services/api"
 
 export default function Login() {
@@ -13,6 +14,7 @@ export default function Login() {
   })
 
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -21,6 +23,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError("")
 
     try {
       const data = await loginUser(form)
@@ -29,11 +32,11 @@ export default function Login() {
         localStorage.setItem("token", data.access_token)
         router.push("/dashboard")
       } else {
-        alert(data.detail || "Invalid credentials")
+        setError(data.detail || "Invalid credentials")
       }
-    } catch (error) {
-      console.error("Login error:", error)
-      alert("Server error. Please try again.")
+    } catch (err) {
+      console.error("Login error:", err)
+      setError("Server error. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -48,6 +51,12 @@ export default function Login() {
         <h2 className="text-2xl font-bold text-white text-center">
           Login
         </h2>
+
+        {error && (
+          <p className="text-red-400 text-sm text-center">
+            {error}
+          </p>
+        )}
 
         <input
           type="email"
@@ -76,6 +85,19 @@ export default function Login() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        {/* Register Link */}
+        <div className="text-center pt-2">
+          <p className="text-gray-400 text-sm">
+            Don’t have an account?{" "}
+            <Link
+              href="/register"
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              Register here
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   )
