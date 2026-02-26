@@ -17,18 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Enable CORS for frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-    "http://localhost:3000",
-    "https://your-project-name.vercel.app"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+ 
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
